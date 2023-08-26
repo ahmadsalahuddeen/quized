@@ -1,6 +1,7 @@
 import { getAuthSession } from '@/lib/nextauth'
 import Link from 'next/link'
 import React from 'react'
+import SignInButton from './SignInButton'
 
 type Props = {}
 
@@ -14,7 +15,9 @@ const Navbar = async (props: Props) => {
 
           </p>
         </Link>
-        <div className="flex items-center"></div>
+        <div className="flex items-center">
+          <SignInButton text='Sign In' / >
+        </div>
       </div>
 
     </div>
