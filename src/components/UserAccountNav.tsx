@@ -7,7 +7,8 @@ import Link from 'next/link'
 import { Button } from './ui/button'
 import { LogOut } from 'lucide-react'
 import UserAvatar from './UserAvatar'
-
+import { redirect } from 'next/navigation'
+import { getAuthSession } from '@/lib/nextauth'
 
 type Props = {
   user: Pick<User, 'email' | 'name' | 'image'>
@@ -18,7 +19,7 @@ const UserAccountNav = ({ user }: Props) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
-        <UserAvatar user={user}/>
+        <UserAvatar user={user} />
       </DropdownMenuTrigger>
       <DropdownMenuContent className='bg-white' align='end'>
         <div className='flex items-center justify-start gap-2 p-2'>
@@ -49,7 +50,7 @@ const UserAccountNav = ({ user }: Props) => {
           className='text-red-600 cursor-pointer'
         >
           Sign Out
-          <LogOut className='w-4 h-4 ml-2'/>
+          <LogOut className='w-4 h-4 ml-2' />
         </DropdownMenuItem>
 
       </DropdownMenuContent>

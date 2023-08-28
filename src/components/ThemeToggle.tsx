@@ -12,10 +12,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
  
-export function ModeToggle() {
+export function ThemeToggle({className, ...props}: React.HTMLAttributes<HTMLDivElement>) {
   const { setTheme } = useTheme()
  
   return (
+    <div className={className} {...props}>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="icon">
@@ -36,5 +37,6 @@ export function ModeToggle() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    </div>
   )
 }
