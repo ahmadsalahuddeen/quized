@@ -1,3 +1,4 @@
+'use client'
 import React from 'react'
 import { Card, CardTitle, CardHeader, CardContent } from '../ui/card'
 import { History } from 'lucide-react'

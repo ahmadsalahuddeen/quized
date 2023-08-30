@@ -1,0 +1,13 @@
+import React from 'react'
+
+type Props = {}
+
+const QuizCreation = (props: Props) => {
+  return (
+    <div className='absolute top-1/2 left-1/2 translate-x-1/2 translate-y-1/2'  >
+
+    </div>
+  )
+}
+
+export default QuizCreation
