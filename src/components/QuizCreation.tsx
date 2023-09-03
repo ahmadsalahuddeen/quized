@@ -1,6 +1,9 @@
+'use client';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { quizCreationSchema } from '@/app/schemas/form/quiz';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Card,
   CardContent,
@@ -8,31 +11,122 @@ import {
   CardHeader,
   CardTitle,
 } from './ui/card';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from './ui/form';
 import { z } from 'zod';
-import {zodResolver} from '@hookform/resolvers/zod'
-
+import { zodResolver } from '@hookform/resolvers/zod';
+import { BookOpen, CopyCheck } from 'lucide-react';
+import { Separator } from './ui/separator';
 
 type Props = {};
 
-type input = z.infer<typeof quizCreationSchema>
+type Input = z.infer<typeof quizCreationSchema>;
 
 const QuizCreation = (props: Props) => {
-  const form = useForm<input>({
-     resolver: zodResolver(quizCreationSchema),
-     defaultValues:{
+  const form = useForm<Input>({
+    resolver: zodResolver(quizCreationSchema),
+    defaultValues: {
       amount: 3,
       topic: '',
-      type: 'open-ended'
-     }
+      type: 'open-ended',
+    },
   });
+  const onSubmit = (input: Input) => {
+    alert(JSON.stringify(input));
+  };
+
+  form.watch()
+
   return (
-    <div className="absolute top-1/2 left-1/2 translate-x-1/2 translate-y-1/2">
+    <div className="absolute -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 ">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Quiz Creation</CardTitle>
+          <CardTitle className="text-2x font-bold">Quiz Creation</CardTitle>
           <CardDescription>Choose a topic</CardDescription>
         </CardHeader>
-        <CardContent></CardContent>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <FormField
+                control={form.control}
+                name="topic"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Topic</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter a topic..." {...field} />
+                    </FormControl>
+                    <FormDescription>Please provide a topic</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Number of Questions</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={10}
+                        placeholder="Enter an amount.."
+                        {...field}
+                        onChange={(e) => {
+                          form.setValue('amount', parseInt(e.target.value));
+                        }}
+                      />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-between">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    form.setValue('type', 'mcq');
+                  }}
+                  className=" w-1/2 rounded-none rounded-l-lg "
+                  variant={
+                    form.getValues('type') === 'mcq' ? 'default' : 'secondary'
+                  }
+                >
+                  <CopyCheck className="w-4 h-4 mr-2" /> Multiple Choice
+                </Button>
+
+                <Separator orientation="vertical" />
+
+                <Button
+                  type="button"
+                  onClick={() => {
+                    form.setValue('type', 'open-ended');
+                  }}
+                  variant={
+                    form.getValues('type') === 'open-ended'
+                      ? 'default'
+                      : 'secondary'
+                  }
+                  className="w-1/2 rounded-none rounded-r-lg"
+                >
+                  <BookOpen className="w-4 h-4 mr-2 " /> Open Ended
+                </Button>
+              </div>
+              <Button type="submit">Submit</Button>
+            </form>
+          </Form>
+        </CardContent>
       </Card>
     </div>
   );
