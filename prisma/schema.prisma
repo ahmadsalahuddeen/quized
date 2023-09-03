@@ -54,13 +54,29 @@ enum GameType {
 }
 
 model Game {
-  id          String    @id @default(cuid())
+  id          String     @id @default(cuid())
   userId      String
   timeStarted DateTime
   topic       String
   timeEnded   DateTime?
   gameType    GameType
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questions   Question[]
 
   @@index([userId], name: "userId")
+}
+
+model Question {
+  id                String   @id @default(cuid())
+  question          String
+  answer            String
+  gameId            String
+  option            Json? // for mcq questions
+  percentageCorrect Float? //  for open-ended question 
+  isCorrect         Boolean? //for mcq question 
+  questionType      GameType
+  userAnswer        String?
+  game              Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@index([gameId], name: "gameId")
 }
