@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
  
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY 
 });
@@ -51,7 +52,7 @@ export async function strict_output(
     }
  
     // Use OpenAI to get a response
-    const response = await openai.createChatCompletion({
+    const response = await openai.chat.completions.create({
       temperature: temperature,
       model: model,
       messages: [
@@ -64,7 +65,7 @@ export async function strict_output(
     });
  
     let res: string =
-      response.data.choices[0].message?.content?.replace(/'/g, '"') ?? "";
+      response.choices[0].message?.content?.replace(/'/g, '"') ?? "";
  
     // ensure that we don't replace away apostrophes in text
     res = res.replace(/(\w)"(\w)/g, "$1'$2");
