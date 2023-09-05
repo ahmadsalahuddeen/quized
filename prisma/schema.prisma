@@ -72,7 +72,7 @@ model Question {
   answer            String
   gameId            String
   option            Json? // for mcq questions
-  percentageCorrect Float? //  for open-ended question 
+  percentageCorrect Float? //  for open_ended question 
   isCorrect         Boolean? //for mcq question 
   questionType      GameType
   userAnswer        String?
