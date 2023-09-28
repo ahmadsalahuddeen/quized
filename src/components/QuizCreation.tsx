@@ -20,16 +20,30 @@ import {
   FormLabel,
   FormMessage,
 } from './ui/form';
-import { z } from 'zod';
+import { input, z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BookOpen, CopyCheck } from 'lucide-react';
 import { Separator } from './ui/separator';
-
+import { useMutation } from '@tanstack/react-query';
+import axios from 'axios';
+import { get } from 'http';
 type Props = {};
 
 type Input = z.infer<typeof quizCreationSchema>;
 
 const QuizCreation = (props: Props) => {
+
+  const {mutate: getQuestions, isLoading} = useMutation({
+    mutationFn: async ({ amount, type, topic }: Input) => {
+      const response = await axios.post('/api/game', {
+        amount,
+        topic,
+        type,
+      });
+      return response.data
+    },
+  });
+
   const form = useForm<Input>({
     resolver: zodResolver(quizCreationSchema),
     defaultValues: {
@@ -38,11 +52,16 @@ const QuizCreation = (props: Props) => {
       type: 'open_ended',
     },
   });
+
   const onSubmit = (input: Input) => {
-    alert(JSON.stringify(input));
+getQuestions({
+  amount: input.amount,
+  topic: input.topic,
+  type: input.type  
+})
   };
 
-  form.watch()
+  form.watch();
 
   return (
     <div className="absolute -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 ">
