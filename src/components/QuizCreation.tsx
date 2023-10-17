@@ -24,23 +24,26 @@ import { input, z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BookOpen, CopyCheck } from 'lucide-react';
 import { Separator } from './ui/separator';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from 'react-query';
 import axios from 'axios';
 import { get } from 'http';
+import { useRouter } from 'next/navigation';
+
 type Props = {};
 
 type Input = z.infer<typeof quizCreationSchema>;
 
 const QuizCreation = (props: Props) => {
+  const router = useRouter();
 
-  const {mutate: getQuestions, isLoading} = useMutation({
+  const { mutate: getQuestions, isLoading } = useMutation({
     mutationFn: async ({ amount, type, topic }: Input) => {
       const response = await axios.post('/api/game', {
         amount,
         topic,
         type,
       });
-      return response.data
+      return response.data;
     },
   });
 
@@ -53,12 +56,23 @@ const QuizCreation = (props: Props) => {
     },
   });
 
-  const onSubmit = (input: Input) => {
-getQuestions({
-  amount: input.amount,
-  topic: input.topic,
-  type: input.type  
-})
+  const onSubmit = ({ amount, topic, type }: Input) => {
+    getQuestions(
+      {
+        amount,
+        topic,
+        type,
+      },
+      {
+        onSuccess: ({ gameId }) => {
+          if (form.getValues('type') === 'mcq') {
+            router.push(`/play/mcq/${gameId}`);
+          } else {
+            router.push(`/play/open_ended/${gameId}`);
+          }
+        },
+      }
+    );
   };
 
   form.watch();
@@ -111,23 +125,26 @@ getQuestions({
                   </FormItem>
                 )}
               />
-              <div className="flex justify-between">
+              <div className="flex justify-between  ">
                 <Button
                   type="button"
                   onClick={() => {
                     form.setValue('type', 'mcq');
                   }}
-                  className=" w-1/2 rounded-none rounded-l-lg "
+                  className=" w-1/2   rounded-none rounded-l-lg  "
+                  size={'default'}
                   variant={
                     form.getValues('type') === 'mcq' ? 'default' : 'secondary'
                   }
                 >
-                  <CopyCheck className="w-4 h-4 mr-2" /> Multiple Choice
+                  <CopyCheck className="hidden lg:block w-4 h-4 mr-2" />{' '}
+                  Multiple Choice
                 </Button>
 
                 <Separator orientation="vertical" />
 
                 <Button
+                  size={'default'}
                   type="button"
                   onClick={() => {
                     form.setValue('type', 'open_ended');
@@ -137,12 +154,13 @@ getQuestions({
                       ? 'default'
                       : 'secondary'
                   }
-                  className="w-1/2 rounded-none rounded-r-lg"
+                  className="w-1/2  rounded-none rounded-r-lg"
                 >
-                  <BookOpen className="w-4 h-4 mr-2 " /> Open Ended
+                  <BookOpen className="hidden lg:block w-4 h-4 mr-2 " />
+                  Open Ended
                 </Button>
               </div>
-              <Button type="submit">Submit</Button>
+              <Button disabled={isLoading} type="submit">Submit</Button>
             </form>
           </Form>
         </CardContent>

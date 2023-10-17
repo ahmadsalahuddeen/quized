@@ -7,6 +7,7 @@ import axios from 'axios';
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
+// POST /api/game
 export async function POST(req: Request, res: Response) {
   try {
     const session = await getAuthSession();
