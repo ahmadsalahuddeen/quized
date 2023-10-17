@@ -8,11 +8,12 @@ import { QueryClient, QueryClientProvider, useQuery } from 'react-query'
 type Props = {
   children: React.ReactNode
 }
+const queryClient = new QueryClient()
 
 
 const Providers = ({ children, ...props }: ThemeProviderProps) => {
   return (
-<QueryClientProvider client={new QueryClient()}>
+<QueryClientProvider client={queryClient}>
 
     <ThemeProvider attribute='class' defaultTheme='system' enableSystem >
       <SessionProvider>{children}</SessionProvider>

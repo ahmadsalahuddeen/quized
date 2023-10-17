@@ -28,6 +28,7 @@ import { useMutation } from 'react-query';
 import axios from 'axios';
 import { get } from 'http';
 import { useRouter } from 'next/navigation';
+import { ReloadIcon } from '@radix-ui/react-icons';
 
 type Props = {};
 
@@ -160,7 +161,17 @@ const QuizCreation = (props: Props) => {
                   Open Ended
                 </Button>
               </div>
-              <Button disabled={isLoading} type="submit">Submit</Button>
+              {!isLoading ? (
+ <Button  type="submit">
+
+ Submit</Button>
+              ):(
+                <Button disabled>
+                <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                Creating Quiz
+              </Button>
+              )}
+             
             </form>
           </Form>
         </CardContent>
