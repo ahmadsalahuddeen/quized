@@ -53,16 +53,16 @@ const QuizCreation = (props: Props) => {
     defaultValues: {
       amount: 3,
       topic: '',
-      type: 'open_ended',
+      type: 'mcq',
     },
   });
 
-  const onSubmit = ({ amount, topic, type }: Input) => {
+  const onSubmit = (input : Input) => {
     getQuestions(
       {
-        amount,
-        topic,
-        type,
+        amount: input.amount,
+        topic: input.topic,
+        type: input.type,
       },
       {
         onSuccess: ({ gameId }) => {

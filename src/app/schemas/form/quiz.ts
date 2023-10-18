@@ -1,10 +1,14 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const quizCreationSchema = z.object({
   topic: z
     .string()
-    .min(4, { message: 'Topic must be atleast 4 characters long' })
-    .max(60, { message: "Topic shouldn't exceed 60 characters" }),
-  type: z.enum(["mcq","open_ended"]),
+    .min(4, {
+      message: "Topic must be at least 4 characters long",
+    })
+    .max(50, {
+      message: "Topic must be at most 50 characters long",
+    }),
+  type: z.enum(["mcq", "open_ended"]),
   amount: z.number().min(1).max(10),
 });
