@@ -16,6 +16,7 @@ const Providers = ({ children, ...props }: ThemeProviderProps) => {
 <QueryClientProvider client={queryClient}>
 
     <ThemeProvider attribute='class' defaultTheme='system' enableSystem >
+
       <SessionProvider>{children}</SessionProvider>
 
     </ThemeProvider>
