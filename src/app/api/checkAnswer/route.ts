@@ -47,6 +47,8 @@ export async function POST(req: Request, res: Response) {
           status: 200,
         }
       );
+    }else if( question.questionType === 'open_ended'){
+      
     }
   } catch (error) {
     if (error instanceof ZodError) {

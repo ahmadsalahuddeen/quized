@@ -29,6 +29,7 @@ import axios from 'axios';
 import { get } from 'http';
 import { useRouter } from 'next/navigation';
 import { ReloadIcon } from '@radix-ui/react-icons';
+import { min } from 'date-fns';
 
 type Props = {};
 
@@ -47,11 +48,11 @@ const QuizCreation = (props: Props) => {
       return response.data;
     },
   });
-
+  
   const form = useForm<Input>({
     resolver: zodResolver(quizCreationSchema),
     defaultValues: {
-      amount: 3,
+      amount:   5,
       topic: '',
       type: 'mcq',
     },
@@ -73,14 +74,14 @@ const QuizCreation = (props: Props) => {
           }
         },
       }
-    );
-  };
+      );
+    };
+    form.watch();
 
-  form.watch();
 
   return (
-    <div className="absolute -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 ">
-      <Card>
+    <div className="absolute -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2   w-[334px] md:w-96 ">
+      <Card className=''>
         <CardHeader>
           <CardTitle className="text-2x font-bold">Quiz Creation</CardTitle>
           <CardDescription>Choose a topic</CardDescription>
@@ -112,7 +113,8 @@ const QuizCreation = (props: Props) => {
                     <FormControl>
                       <Input
                         type="number"
-                        min={1}
+                  min={form.getValues('type') === 'mcq' ? 5 : 1}
+                      
                         max={10}
                         placeholder="Enter an amount.."
                         {...field}
@@ -126,7 +128,7 @@ const QuizCreation = (props: Props) => {
                   </FormItem>
                 )}
               />
-              <div className="flex justify-between  ">
+              <div className="flex justify-between   ">
                 <Button
                   type="button"
                   onClick={() => {
@@ -138,7 +140,7 @@ const QuizCreation = (props: Props) => {
                     form.getValues('type') === 'mcq' ? 'default' : 'secondary'
                   }
                 >
-                  <CopyCheck className="hidden lg:block w-4 h-4 mr-2" />{' '}
+                  <CopyCheck className="hidden lg:block w-4 h-4 mr-2 " />{' '}
                   Multiple Choice
                 </Button>
 
