@@ -3,11 +3,13 @@ import { differenceInSeconds } from 'date-fns'
 import React, { useMemo, useState } from 'react'
 import MCQCounter from './MCQCounter'
 import { ChevronRight, Loader2, Timer } from 'lucide-react'
-import { CardDescription, CardHeader, CardTitle } from './ui/card'
+import { Card, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { useMutation } from 'react-query'
 import { checkAnswerSchema } from '@/app/schemas/question'
 import axios from 'axios'
+import { formatTimeDelta } from '@/lib/utils'
+import z from 'zod'
 
 type Props = {
   game: Game & {questions: Pick<Question, 'id' |'question' | 'answer'>[] }
@@ -51,9 +53,9 @@ const OpenEnded = ({game}: Props) => {
         </div>
       </div>
 
-      <Card className="w-full mt-4">
+      <Card  className="w-full mt-4">
         {/* question */}
-        <CardHeader className="flex flex-row items-center">
+        <CardHeader className="flex flex-row items-center"> 
           <CardTitle className="mr-5 text-center divide-y divide-zinc-600/50 ">
             <div> {questionIndex + 1}</div>
             <div className="text-slate-400 text-base ">
@@ -71,7 +73,7 @@ const OpenEnded = ({game}: Props) => {
         <Button
           disabled={isChecking}
           type="button"
-          className="mt-2"
+          className="mt-2" q
           onClick={() => handleNext()}
         >
           {isChecking && <Loader2 className='h-4 w-4 mr-2 animate-spin'/> }
