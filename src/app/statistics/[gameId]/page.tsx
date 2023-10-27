@@ -1,10 +1,14 @@
 import React from 'react'
 
-type Props = {}
+type Props = {
+  params: {
+    gameId: string
+  }
+}
 
-const StatisticsPage = (props: Props) => {
+const StatisticsPage = ({params: {gameId}}: Props) => {
   return (
-    <div>StatisticsPage</div>
+    <div>{gameId}</div>
   )
 }
 
