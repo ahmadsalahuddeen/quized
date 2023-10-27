@@ -10,7 +10,7 @@ import { useMutation } from 'react-query';
 import axios from 'axios';
 import { toast } from 'sonner';
 import z, { boolean, coerce } from 'zod';
-import { checkAnswerSchema } from '@/app/schemas/question';
+import { checkAnswerSchema, endGameSchema } from '@/app/schemas/question';
 import Link from 'next/link';
 import { cn, formatTimeDelta } from '@/lib/utils';
 import { prisma } from '@/lib/db';
@@ -52,10 +52,22 @@ const MCQ = ({ game }: Props) => {
   const { mutate: checkAnswer, isLoading: isChecking } = useMutation({
     mutationFn: async () => {
       const payload: z.infer<typeof checkAnswerSchema> = {
+        
         questionId: currentQuestion.id,
         userAnswer: options[selectedChoice],
       };
       const response = await axios.post('/api/checkAnswer', payload);
+      return response.data;
+    },
+  });
+
+  // API to update game endTime
+  const { mutate: endGame } = useMutation({
+    mutationFn: async () => {
+      const payload: z.infer<typeof endGameSchema> = {
+        gameId: game.id,
+      };
+      const response = await axios.post(`/api/endGame`, payload);
       return response.data;
     },
   });
@@ -80,12 +92,7 @@ const MCQ = ({ game }: Props) => {
           setwrongAnswer((prev) => prev + 1);
         }
         if (questionIndex === game.questions.length - 1) {
-          await prisma.game.update({
-            where: { id: game.id },
-            data: {
-              timeEnded: now,
-            },
-          });
+          endGame()
           setHasEnded(true);
           return;
         }

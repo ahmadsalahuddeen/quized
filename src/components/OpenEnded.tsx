@@ -7,13 +7,14 @@ import { BarChart, ChevronRight, Loader2, Timer } from 'lucide-react';
 import { Card, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button, buttonVariants } from './ui/button';
 import { useMutation } from 'react-query';
-import { checkAnswerSchema } from '@/app/schemas/question';
+import { checkAnswerSchema, endGameSchema } from '@/app/schemas/question';
 import axios from 'axios';
 import { cn, formatTimeDelta } from '@/lib/utils';
 import z from 'zod';
 import { toast } from 'sonner';
 import BlankAnwerInput from './BlankAnwerInput';
 import Link from 'next/link';
+import { prisma } from '@/lib/db';
 
 type Props = {
   game: Game & { questions: Pick<Question, 'id' | 'question' | 'answer'>[] };
@@ -50,6 +51,7 @@ const OpenEnded = ({ game }: Props) => {
         input.value = '';
       });
       const payload: z.infer<typeof checkAnswerSchema> = {
+       
         questionId: currentQuestion.id,
         userAnswer: filledAnswer,
       };
@@ -58,17 +60,31 @@ const OpenEnded = ({ game }: Props) => {
     },
   });
 
+
+  // API to update game endTime
+  const { mutate: endGame } = useMutation({
+    mutationFn: async () => {
+      const payload: z.infer<typeof endGameSchema> = {
+        gameId: game.id,
+      };
+      const response = await axios.post(`/api/endGame`, payload);
+      return response.data;
+    },
+  });
+
+
   // next button handler,
   const handleNext = useCallback(() => {
     if (isChecking) return; // to avoid spam button click
 
     checkAnswer(undefined, {
-      onSuccess: ({ percentageSimilar }) => {
+      onSuccess: async({ percentageSimilar }) => {
         toast.success(
           `Your answer is ${percentageSimilar}% similar to correct answer.`,
           { description: 'answer are matched based on similarity comparisons' }
         );
         if (questionIndex === game.questions.length - 1) {
+         endGame()
           setHasEnded(true);
           return;
         }

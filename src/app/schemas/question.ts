@@ -7,7 +7,13 @@ export const getQuestionsSchema = z.object({
 });
 
 export const checkAnswerSchema = z.object({
+
   userAnswer: z.string(),
   questionId: z.string(),
+});
+export const endGameSchema = z.object({
+
+  gameId: z.string(),
+
 });
 
