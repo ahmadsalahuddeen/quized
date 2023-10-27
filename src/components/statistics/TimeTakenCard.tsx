@@ -5,7 +5,7 @@ import { formatTimeDelta } from '@/lib/utils';
 import { differenceInSeconds } from 'date-fns';
 
 type Props = {
-  timeEnded: Date;
+  timeEnded: Date ;
   timeStarted: Date
 }
 
@@ -19,7 +19,7 @@ const TimeTakenCard = ({timeEnded, timeStarted}: Props) => {
     </CardHeader>
     <CardContent>
       <div className="text-sm font-medium">
-        {formatTimeDelta(differenceInSeconds(timeStarted, timeEnded))}
+        {formatTimeDelta(differenceInSeconds(timeEnded, timeStarted))}
       </div>
     </CardContent>
   </Card>
