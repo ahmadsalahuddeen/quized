@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
+import { compareTwoStrings } from 'string-similarity';
 
 export async function POST(req: Request, res: Response) {
   try {
@@ -31,9 +32,9 @@ export async function POST(req: Request, res: Response) {
       const isCorrect =
         question.answer.toLowerCase().trim() ===
         userAnswer.toLowerCase().trim();
-      
-        // updating userAnswer's result in DB
-        await prisma.question.update({
+
+      // updating userAnswer's result in DB
+      await prisma.question.update({
         where: {
           id: questionId,
         },
@@ -47,8 +48,25 @@ export async function POST(req: Request, res: Response) {
           status: 200,
         }
       );
-    }else if( question.questionType === 'open_ended'){
-      
+    } else if (question.questionType === 'open_ended') {
+      let percentageSimilar = compareTwoStrings(
+        userAnswer.toLowerCase().trim(),
+        question.answer.toLowerCase().trim()
+      );
+      percentageSimilar = Math.round(percentageSimilar * 100);
+      await prisma.question.update({
+        where: { id: questionId },
+        data: { percentageCorrect: percentageSimilar },
+      });
+
+      return NextResponse.json(
+        {
+          percentageSimilar,
+        },
+        {
+          status: 200,
+        }
+      );
     }
   } catch (error) {
     if (error instanceof ZodError) {
@@ -61,16 +79,16 @@ export async function POST(req: Request, res: Response) {
         }
       );
     }
-     // For logs purpose
-     console.log(error);
-     // You should return a response in all cases
-     return NextResponse.json(
-       {
-         error: "Unexpected error occured",
-       },
-       {
-         status: 500,
-       }
-     );
+    // For logs purpose
+    console.log(error);
+    // You should return a response in all cases
+    return NextResponse.json(
+      {
+        error: 'Unexpected error occured',
+      },
+      {
+        status: 500,
+      }
+    );
   }
 }

@@ -91,6 +91,8 @@ const MCQ = ({ game }: Props) => {
     });
   }, [checkAnswer, toast, isChecking, questionIndex, game.questions.length]);
 
+
+  // keydown effect
   React.useEffect(() => {
     // enabling keypress support to select answer
     const handleKeydown = (event: KeyboardEvent) => {

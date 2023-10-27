@@ -1,29 +1,47 @@
-import { Game, Question } from '@prisma/client'
-import { differenceInSeconds } from 'date-fns'
-import React, { useMemo, useState } from 'react'
-import MCQCounter from './MCQCounter'
-import { ChevronRight, Loader2, Timer } from 'lucide-react'
-import { Card, CardDescription, CardHeader, CardTitle } from './ui/card'
-import { Button } from './ui/button'
-import { useMutation } from 'react-query'
-import { checkAnswerSchema } from '@/app/schemas/question'
-import axios from 'axios'
-import { formatTimeDelta } from '@/lib/utils'
-import z from 'zod'
+
+'use client'
+import { Game, Question } from '@prisma/client';
+import { differenceInSeconds } from 'date-fns';
+import React, { useCallback, useMemo, useState } from 'react';
+import MCQCounter from './MCQCounter';
+import { ChevronRight, Loader2, Timer } from 'lucide-react';
+import { Card, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Button } from './ui/button';
+import { useMutation } from 'react-query';
+import { checkAnswerSchema } from '@/app/schemas/question';
+import axios from 'axios';
+import { formatTimeDelta } from '@/lib/utils';
+import z from 'zod';
+import { toast } from 'sonner';
+import BlankAnwerInput from './BlankAnwerInput';
 
 type Props = {
-  game: Game & {questions: Pick<Question, 'id' |'question' | 'answer'>[] }
-}
+  game: Game & { questions: Pick<Question, 'id' | 'question' | 'answer'>[] };
+};
 
-const OpenEnded = ({game}: Props) => {
+const OpenEnded = ({ game }: Props) => {
+
+
   const [questionIndex, setQuestionIndex] = useState(0);
   const [correctAnswer, setcorrectAnswer] = useState<number>(0);
-  const [HasEnded, setHasEnded] = useState<boolean>(false)
-  const [now, setNow] = useState<Date>(new Date())
-
+  const [now, setNow] = useState<Date>(new Date());
+  const [HasEnded, setHasEnded] = useState<boolean>(false);
+  
   const currentQuestion = useMemo(() => {
     return game.questions[questionIndex];
   }, [questionIndex, game.questions]);
+  
+  // timer interval
+  React.useEffect(()=>{
+    const interval = setInterval(()=>{
+      if(!HasEnded){
+        setNow(new Date())
+      }
+    }, 1000)
+    return ()=>{
+      clearInterval(interval)
+    }
+  },[HasEnded])
 
   const { mutate: checkAnswer, isLoading: isChecking } = useMutation({
     mutationFn: async () => {
@@ -35,6 +53,40 @@ const OpenEnded = ({game}: Props) => {
       return response.data;
     },
   });
+
+  // next button handler,
+  const handleNext = useCallback(() => {
+    if (isChecking) return; // to avoid spam button click
+    checkAnswer(undefined, {
+      onSuccess: ({ percentageSimilar }) => {
+        toast.success(`Your answer is ${percentageSimilar}% similar to correct answer.`,{description:'answer are matched based on similarity comparisons'})
+        if (questionIndex === game.questions.length - 1) {
+          setHasEnded(true);
+          return;
+        }
+
+        setQuestionIndex((prev) => prev + 1);
+      },
+    });
+  }, [checkAnswer, toast, isChecking, questionIndex, game.questions.length]);
+
+
+    // keydown effect
+    React.useEffect(() => {
+      // enabling keypress support to select answer
+      const handleKeydown = (event: KeyboardEvent) => {
+     if (event.key == 'Enter') {
+          handleNext();
+        }
+      };
+      document.addEventListener('keydown', handleKeydown);
+      return () => {
+        document.removeEventListener('keydown', handleKeydown);
+      };
+    }, [handleNext]);
+
+
+
   return (
     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 md:w-[80vw] max-w-4xl w-[90vw]">
       <div className="flex flex-row justify-between">
@@ -53,9 +105,9 @@ const OpenEnded = ({game}: Props) => {
         </div>
       </div>
 
-      <Card  className="w-full mt-4">
+      <Card className="w-full mt-4">
         {/* question */}
-        <CardHeader className="flex flex-row items-center"> 
+        <CardHeader className="flex flex-row items-center">
           <CardTitle className="mr-5 text-center divide-y divide-zinc-600/50 ">
             <div> {questionIndex + 1}</div>
             <div className="text-slate-400 text-base ">
@@ -69,19 +121,19 @@ const OpenEnded = ({game}: Props) => {
       </Card>
       {/* options */}
       <div className="flex flex-col w-full items-center justify-center mt-4">
-        
+        <BlankAnwerInput answer={currentQuestion.answer}/>
         <Button
           disabled={isChecking}
           type="button"
-          className="mt-2" q
+          className="mt-2"
           onClick={() => handleNext()}
         >
-          {isChecking && <Loader2 className='h-4 w-4 mr-2 animate-spin'/> }
+          {isChecking && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           Next <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
     </div>
   );
-}
+};
 
-export default OpenEnded
+export default OpenEnded;
