@@ -1,9 +1,12 @@
 import React, { useMemo } from 'react';
 import keyword_extractor from 'keyword-extractor';
-type Props = { answer: string };
+type Props = {
+  answer: string;
+  setBlankAnswer: React.Dispatch<React.SetStateAction<string>>;
+};
 
 const BLANKS = '_____';
-const BlankAnwerInput = ({ answer }: Props) => {
+const BlankAnwerInput = ({ answer, setBlankAnswer }: Props) => {
   // extracting and shuffling keywords
   const keywords = React.useMemo(() => {
     const words = keyword_extractor.extract(answer, {
@@ -21,10 +24,11 @@ const BlankAnwerInput = ({ answer }: Props) => {
     const answerwihtblanks = keywords.reduce((acc, keyword) => {
       return acc.replace(keyword, BLANKS);
     }, answer);
+    setBlankAnswer(answerwihtblanks);
     return answerwihtblanks;
-  }, [keywords, answer]);
- 
-  console.log(asnwerWithBlanks);
+  }, [keywords, answer, setBlankAnswer]);
+
+
   return (
     <div className=" flex justify-start w-full mt-4">
       <h1 className="text-xl font-semibold">
@@ -35,14 +39,13 @@ const BlankAnwerInput = ({ answer }: Props) => {
               {index === asnwerWithBlanks.split(BLANKS).length - 1 ? null : (
                 <input
                   id="user-blank-input"
-                  className="text-center border-b-2 border-black dark:border-white w-28 focus: border-2 focus:outline-none focus:border-b-4"
+                  className="text-center border-b-2 border-black dark:border-white w-28 focus:border-2 focus:outline-none focus:border-b-4"
                 ></input>
               )}
             </>
           );
         })}
       </h1>
-
     </div>
   );
 };

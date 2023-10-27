@@ -1,53 +1,57 @@
-
-'use client'
+'use client';
 import { Game, Question } from '@prisma/client';
 import { differenceInSeconds } from 'date-fns';
 import React, { useCallback, useMemo, useState } from 'react';
 import MCQCounter from './MCQCounter';
-import { ChevronRight, Loader2, Timer } from 'lucide-react';
+import { BarChart, ChevronRight, Loader2, Timer } from 'lucide-react';
 import { Card, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
+import { Button, buttonVariants } from './ui/button';
 import { useMutation } from 'react-query';
 import { checkAnswerSchema } from '@/app/schemas/question';
 import axios from 'axios';
-import { formatTimeDelta } from '@/lib/utils';
+import { cn, formatTimeDelta } from '@/lib/utils';
 import z from 'zod';
 import { toast } from 'sonner';
 import BlankAnwerInput from './BlankAnwerInput';
+import Link from 'next/link';
 
 type Props = {
   game: Game & { questions: Pick<Question, 'id' | 'question' | 'answer'>[] };
 };
 
 const OpenEnded = ({ game }: Props) => {
-
-
+  const [blankAnswer, setBlankAnswer] = useState('');
   const [questionIndex, setQuestionIndex] = useState(0);
   const [correctAnswer, setcorrectAnswer] = useState<number>(0);
   const [now, setNow] = useState<Date>(new Date());
   const [HasEnded, setHasEnded] = useState<boolean>(false);
-  
+
   const currentQuestion = useMemo(() => {
     return game.questions[questionIndex];
   }, [questionIndex, game.questions]);
-  
+
   // timer interval
-  React.useEffect(()=>{
-    const interval = setInterval(()=>{
-      if(!HasEnded){
-        setNow(new Date())
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      if (!HasEnded) {
+        setNow(new Date());
       }
-    }, 1000)
-    return ()=>{
-      clearInterval(interval)
-    }
-  },[HasEnded])
+    }, 1000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [HasEnded]);
 
   const { mutate: checkAnswer, isLoading: isChecking } = useMutation({
     mutationFn: async () => {
+      let filledAnswer = blankAnswer;
+      document.querySelectorAll('#user-blank-input').forEach((input) => {
+        filledAnswer = filledAnswer.replace('_____', input.value);
+        input.value = '';
+      });
       const payload: z.infer<typeof checkAnswerSchema> = {
         questionId: currentQuestion.id,
-        userAnswer: '',
+        userAnswer: filledAnswer,
       };
       const response = await axios.post('/api/checkAnswer', payload);
       return response.data;
@@ -57,9 +61,13 @@ const OpenEnded = ({ game }: Props) => {
   // next button handler,
   const handleNext = useCallback(() => {
     if (isChecking) return; // to avoid spam button click
+
     checkAnswer(undefined, {
       onSuccess: ({ percentageSimilar }) => {
-        toast.success(`Your answer is ${percentageSimilar}% similar to correct answer.`,{description:'answer are matched based on similarity comparisons'})
+        toast.success(
+          `Your answer is ${percentageSimilar}% similar to correct answer.`,
+          { description: 'answer are matched based on similarity comparisons' }
+        );
         if (questionIndex === game.questions.length - 1) {
           setHasEnded(true);
           return;
@@ -70,21 +78,33 @@ const OpenEnded = ({ game }: Props) => {
     });
   }, [checkAnswer, toast, isChecking, questionIndex, game.questions.length]);
 
+  // keydown effect
+  React.useEffect(() => {
+    // enabling keypress support to select answer
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.key == 'Enter') {
+        handleNext();
+      }
+    };
+    document.addEventListener('keydown', handleKeydown);
+    return () => {
+      document.removeEventListener('keydown', handleKeydown);
+    };
+  }, [handleNext]);
 
-    // keydown effect
-    React.useEffect(() => {
-      // enabling keypress support to select answer
-      const handleKeydown = (event: KeyboardEvent) => {
-     if (event.key == 'Enter') {
-          handleNext();
-        }
-      };
-      document.addEventListener('keydown', handleKeydown);
-      return () => {
-        document.removeEventListener('keydown', handleKeydown);
-      };
-    }, [handleNext]);
+  //  returns the result page completing every question
+  if(HasEnded) return (
+    <div className="absolute flex flex-col justify-center top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+      <div className="px-4 font-semibold text-white bg-green-500 rounded-md whitespace-nowrap ">
+        You Completed in {formatTimeDelta(differenceInSeconds(now, game.timeStarted))}
+      </div>
+      <Link href={`/statistics/${game.id}`} className={cn( buttonVariants(), 'mt-2')}>
+      View statistics
+      <BarChart className='ml-2 w-4 h-4'/>
 
+      </Link>
+    </div>
+  )
 
 
   return (
@@ -121,7 +141,10 @@ const OpenEnded = ({ game }: Props) => {
       </Card>
       {/* options */}
       <div className="flex flex-col w-full items-center justify-center mt-4">
-        <BlankAnwerInput answer={currentQuestion.answer}/>
+        <BlankAnwerInput
+          answer={currentQuestion.answer}
+          setBlankAnswer={setBlankAnswer}
+        />
         <Button
           disabled={isChecking}
           type="button"
