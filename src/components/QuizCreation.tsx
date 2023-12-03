@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { quizCreationSchema } from '@/app/schemas/form/quiz';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,7 @@ import { get } from 'http';
 import { useRouter } from 'next/navigation';
 import { ReloadIcon } from '@radix-ui/react-icons';
 import { min } from 'date-fns';
+import LoadingQuestions from './LoadingQuestions';
 
 type Props = {};
 
@@ -37,6 +38,8 @@ type Input = z.infer<typeof quizCreationSchema>;
 
 const QuizCreation = (props: Props) => {
   const router = useRouter();
+  const [showLoader, setShowLoader] = useState<boolean>(false)
+  const [finished, setFinished] = React.useState(false)
 
   const { mutate: getQuestions, isLoading } = useMutation({
     mutationFn: async ({ amount, type, topic }: Input) => {
@@ -59,6 +62,7 @@ const QuizCreation = (props: Props) => {
   });
 
   const onSubmit = (input : Input) => {
+    setShowLoader(true)
     getQuestions(
       {
         amount: input.amount,
@@ -67,18 +71,28 @@ const QuizCreation = (props: Props) => {
       },
       {
         onSuccess: ({ gameId }) => {
-          if (form.getValues('type') === 'mcq') {
-            router.push(`/play/mcq/${gameId}`);
-          } else {
-            router.push(`/play/open_ended/${gameId}`);
-          }
+          setFinished(true)
+          setTimeout(()=>{
+
+            if (form.getValues('type') === 'mcq') {
+              router.push(`/play/mcq/${gameId}`);
+            } else {
+              router.push(`/play/open_ended/${gameId}`);
+            }
+          }, 1000)
         },
+        onError: ( )=>{
+          setShowLoader(false)
+        }
       }
+
       );
     };
     form.watch();
 
-
+if(showLoader){
+  return <LoadingQuestions finished={finished} />
+}
   return (
     <div className="absolute -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2   w-[334px] md:w-96 ">
       <Card className=''>
