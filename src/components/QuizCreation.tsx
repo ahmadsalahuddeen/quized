@@ -32,11 +32,14 @@ import { ReloadIcon } from '@radix-ui/react-icons';
 import { min } from 'date-fns';
 import LoadingQuestions from './LoadingQuestions';
 
-type Props = {};
+type Props = {
+topicParams: string
+
+};
 
 type Input = z.infer<typeof quizCreationSchema>;
 
-const QuizCreation = (props: Props) => {
+const QuizCreation = ({topicParams}: Props) => {
   const router = useRouter();
   const [showLoader, setShowLoader] = useState<boolean>(false)
   const [finished, setFinished] = React.useState(false)
@@ -56,7 +59,7 @@ const QuizCreation = (props: Props) => {
     resolver: zodResolver(quizCreationSchema),
     defaultValues: {
       amount:   5,
-      topic: '',
+      topic: topicParams ,
       type: 'mcq',
     },
   });
